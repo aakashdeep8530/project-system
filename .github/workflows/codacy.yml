@@ -1,4 +1,4 @@
-name: Codacy Check
+name: CI with Codacy
 
 on:
   push:
@@ -9,53 +9,43 @@ on:
       - main
 
 jobs:
-  codacy:
+  build_and_test:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code from GitHub
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python (if you're using Python)
-        uses: actions/setup-python@v2
+      # Step 2: Set up .NET SDK (for C#)
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v2
         with:
-          python-version: '3.x'
+          dotnet-version: '6.0'  # Ya jo bhi .NET version aap use kar rahe ho
 
-      - name: Install dependencies
-        # run: |
-        #   pip install -r requirements.txt
+      # Step 3: Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
 
-      - name: Install Codacy Coverage Tool
+      # Step 4: Build the project
+      - name: Build the project
+        run: dotnet build --configuration Release
+
+      # Step 5: Run the tests
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      # Step 6: Install Codacy Coverage Reporter
+      - name: Install Codacy Coverage Reporter
         run: |
           curl -Ls https://github.com/codacy/codacy-coverage-reporter/releases/download/v5.0.0/codacy-coverage-reporter-5.0.0-linux-amd64 -o codacy-coverage-reporter
           chmod +x codacy-coverage-reporter
           mv codacy-coverage-reporter /usr/local/bin/
 
-      - name: Run Codacy coverage report upload
+      # Step 7: Upload coverage to Codacy
+      - name: Upload coverage to Codacy
         env:
           CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
         run: |
           codacy-coverage-reporter upload --repo-token ${{ secrets.CODACY_API_TOKEN }}
 
-      - name: Run Tests (Aapke test commands)
-        run: |
-          pytest  # Agar aap pytest use kar rahe hain
-
-      - name: Fetch Codacy issues via API
-        env:
-          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
-        run: |
-          curl -H "Authorization: token $CODACY_API_TOKEN" \
-               -H "Accept: application/json" \
-               https://api.codacy.com/2.0/projects/$CODACY_PROJECT_TOKEN/issues \
-               > codacy_issues.json
-
-      - name: Fail pipeline if Codacy has issues
-        run: |
-          errors=$(jq '.length' codacy_issues.json)
-          if [ "$errors" -gt 0 ]; then
-            echo "Codacy found $errors issues."
-            exit 1
-          else
-            echo "No issues found by Codacy."
-          fi
