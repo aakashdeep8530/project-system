@@ -1,5 +1,7 @@
 # The .NET Project System for Visual Studio
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ce92eef80826470c8059cc2be8fd8692)](https://app.codacy.com/gh/aakashdeep8530/project-system?utm_source=github.com&utm_medium=referral&utm_content=aakashdeep8530/project-system&utm_campaign=Badge_Grade)
+
 | Release             | Build                   | Compliance                   | Publish                   | Localization
 |---------------------|:-----------------------:|:----------------------------:|:-------------------------:|:-------------------------:
 | [main][MainBranch]  | [![MainBuild]][MainRun] | [![MainCompliance]][MainRun] | [![MainPublish]][MainRun] | [![MainLocalization]][MainRun]
