@@ -17,11 +17,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Set up .NET SDK (for C#)
+      # Step 2: Set up .NET SDK (Targeting .NET 8.0)
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '6.0'  # Ya jo bhi .NET version aap use kar rahe ho
+          dotnet-version: '8.0.x'  # Use .NET 8.0 SDK
 
       # Step 3: Restore dependencies
       - name: Restore dependencies
@@ -31,7 +31,7 @@ jobs:
       - name: Build the project
         run: dotnet build --configuration Release
 
-      # Step 5: Run the tests
+      # Step 5: Run tests
       - name: Run tests
         run: dotnet test --configuration Release --no-build --verbosity normal
 
@@ -48,4 +48,3 @@ jobs:
           CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
         run: |
           codacy-coverage-reporter upload --repo-token ${{ secrets.CODACY_API_TOKEN }}
-
