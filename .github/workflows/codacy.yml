@@ -1,33 +1,33 @@
-name: Codacy Analysis for C#
+name: CI Pipeline for C#
 
 on:
   push:
     branches:
-      - main  # or the default branch
+      - main
   pull_request:
     branches:
-      - main  # or the default branch
+      - main
 
 jobs:
-  codacy:
-    runs-on: ubuntu-latest  # You can use windows-latest if you're working in Windows containers
+  build:
+    runs-on: ubuntu-latest  # Or 'windows-latest' if you're targeting Windows.
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up .NET Core SDK
+    - name: Set up .NET 8.0 SDK
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '6.0'  # Change this to your project's .NET version
+        dotnet-version: '8.0.x'  # Specify .NET 8.0 version here
 
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Build project
+    - name: Build the project
       run: dotnet build --configuration Release
 
-    - name: Run tests (optional, if you have tests)
+    - name: Run tests
       run: dotnet test --configuration Release
 
     - name: Install Codacy CLI
