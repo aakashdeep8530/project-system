@@ -1,25 +1,61 @@
-name: Codacy Analysis on Pull Request
+name: Codacy Check
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
-      - cdea  # Trigger only when a pull request targets the 'cdea' branch
+      - main
 
 jobs:
-  codacy_analysis:
-    runs-on: ubuntu-latest  # Or 'windows-latest' if you're targeting Windows.
+  codacy:
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Install Codacy CLI
-      run: |
-        curl -sSL https://download.codacy.com/cli/latest/linux/codacy-cli-linux-x86_64.tar.gz -o codacy-cli.tar.gz
-        tar -xvzf codacy-cli.tar.gz -C /usr/local/bin
+      - name: Set up Python (if you're using Python)
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
 
-    - name: Run Codacy analysis
-      env:
-        CODACY_PROJECT_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
-      run: |
-        codacy-cli analyze --token $CODACY_API_TOKEN
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Install Codacy Coverage Tool
+        run: |
+          curl -Ls https://github.com/codacy/codacy-coverage-reporter/releases/download/v5.0.0/codacy-coverage-reporter-5.0.0-linux-amd64 -o codacy-coverage-reporter
+          chmod +x codacy-coverage-reporter
+          mv codacy-coverage-reporter /usr/local/bin/
+
+      - name: Run Codacy coverage report upload
+        env:
+          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+        run: |
+          codacy-coverage-reporter upload --repo-token ${{ secrets.CODACY_API_TOKEN }}
+
+      - name: Run Tests (Aapke test commands)
+        run: |
+          pytest  # Agar aap pytest use kar rahe hain
+
+      - name: Fetch Codacy issues via API
+        env:
+          CODACY_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+        run: |
+          curl -H "Authorization: token $CODACY_API_TOKEN" \
+               -H "Accept: application/json" \
+               https://api.codacy.com/2.0/projects/$CODACY_PROJECT_TOKEN/issues \
+               > codacy_issues.json
+
+      - name: Fail pipeline if Codacy has issues
+        run: |
+          errors=$(jq '.length' codacy_issues.json)
+          if [ "$errors" -gt 0 ]; then
+            echo "Codacy found $errors issues."
+            exit 1
+          else
+            echo "No issues found by Codacy."
+          fi
