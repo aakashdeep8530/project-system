@@ -1,34 +1,17 @@
-name: CI Pipeline for C#
+name: Codacy Analysis on Pull Request
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
-      - main
+      - cdea  # Trigger only when a pull request targets the 'cdea' branch
 
 jobs:
-  build:
+  codacy_analysis:
     runs-on: ubuntu-latest  # Or 'windows-latest' if you're targeting Windows.
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
-    - name: Set up .NET 8.0 SDK
-      uses: actions/setup-dotnet@v3  # Updated to the latest version
-      with:
-        dotnet-version: '8.0.x'  # Specify .NET 8.0 version here
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build the project
-      run: dotnet build --configuration Release
-
-    - name: Run tests
-      run: dotnet test --configuration Release
 
     - name: Install Codacy CLI
       run: |
