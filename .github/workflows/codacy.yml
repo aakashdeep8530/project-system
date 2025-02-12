@@ -1,0 +1,35 @@
+name: Codacy Analysis
+
+on:
+  push:
+    branches:
+      - main  # or your default branch
+  pull_request:
+    branches:
+      - main  # or your default branch
+
+jobs:
+  codacy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python (or any other language you use)
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # Specify the version for your project
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt  # Install project dependencies
+        # If you're using other languages, adjust this step accordingly.
+
+    - name: Run Codacy analysis
+      env:
+        CODACY_PROJECT_API_TOKEN: ${{ secrets.CODACY_API_TOKEN }}
+      run: |
+        curl -sSL https://download.codacy.com/cli/latest/linux/codacy-cli-linux-x86_64.tar.gz -o codacy-cli.tar.gz
+        tar -xvzf codacy-cli.tar.gz
+        ./codacy-cli analyze --token $CODACY_PROJECT_API_TOKEN
